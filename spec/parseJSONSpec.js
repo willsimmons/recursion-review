@@ -9,7 +9,6 @@ describe('parseJSON', function() {
       // Replace this line with an `expect` statement that tests
       // the behavior described by the `it` string
       expect(expected).to.deep.equal(result);
-      throw new Error('Test is missing.')
     });
   });
 
