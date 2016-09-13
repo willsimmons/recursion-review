@@ -4,7 +4,6 @@
 // but you're not, so you'll write it from scratch:
 var parseJSON = function(json) {
   // your code goes here
-  console.log(json)
   function testBool(string) {
     if (string==="true") {
       return true
@@ -19,13 +18,31 @@ var parseJSON = function(json) {
       return "number"
     }
   }
-  console.log(testBool("null"))
   //test for easy 1 item Json and just return that
   if(json[0]==='"'){
     if (json==='""') {
       return '';
     }
-    return json.slice(1,json.length-1)
+    var string=json.slice(1,json.length-1).split('')
+    var escaped = false;
+    var toDelete = [];
+    string.forEach(function(letter,index){
+      if(letter === "\\" && escaped === false){
+        escaped = true;
+        toDelete.push(index);
+      }
+      else if(escaped ===true){
+        //just in case
+        escaped=false;
+      }
+    });
+    return string.filter(function(x,i){
+      if (toDelete.includes(i)) {
+        return false
+      } else {
+        return true
+      }
+    }).join('')
   }
   else if (json[0]==='[') {
     //handle arrays
@@ -147,12 +164,24 @@ var parseJSON = function(json) {
 
     var keyParse = false;
     var valueParse = false;
+    var afterComma = false
 
     var keys = [];
     var values = [];
+    var afterCommas = [];
 
 
     obj.forEach(function(x,i){
+      if (afterComma===true) {
+        if (x===" ") {
+          afterCommas.push(1);
+          afterComma = false
+        }
+        else {
+          afterCommas.push(0)
+          afterComma = false;
+        }
+      }
       if (valueParse===true) {
         if(skippingString === true){
         if(x==='"'){
@@ -201,7 +230,9 @@ var parseJSON = function(json) {
       if (keyParse===false) {
         if (x===":"){
           valueParse = true;
-          values.push([i+2])
+          values.push([i+1]);
+          afterComma = true;
+          //values.push([i+2])
         }
         if(x === '"' && valueParse===false){
           keyParse = true;
@@ -222,7 +253,7 @@ var parseJSON = function(json) {
     values[values.length-1].push(obj.length)
     var result = {}
     keys.forEach(function(objKeys,index){
-      result[obj.slice(objKeys[0],objKeys[1])] = parseJSON(obj.slice(values[index][0],values[index][1]))
+      result[obj.slice(objKeys[0],objKeys[1])] = parseJSON(obj.slice(values[index][0]+afterCommas[index],values[index][1]))
     })
     console.log(result);
     return result
